@@ -1,0 +1,1 @@
+A convenient app to compare time in different timezones

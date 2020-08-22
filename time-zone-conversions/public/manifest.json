@@ -1,0 +1,8 @@
+{
+  "short_name": "Timezone Conversion",
+  "name": "Timezone Conversion",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}
