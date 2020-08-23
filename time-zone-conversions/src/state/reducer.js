@@ -4,8 +4,7 @@ function reducer(state, action) {
   switch (action.type) {
     case 'setData':
       return {
-        ...state,
-        data: createData(state.timezones, state.baseTimesUtc)
+        ...state
       };
     case 'addTimezone':
       if (
@@ -15,8 +14,7 @@ function reducer(state, action) {
         state.timezones = [...state.timezones, action.value];
         return {
           ...state,
-          timezones: state.timezones,
-          data: createData(state.timezones, state.baseTimesUtc)
+          timezones: state.timezones
         };
       }
       return state;
@@ -30,8 +28,7 @@ function reducer(state, action) {
         ];
         return {
           ...state,
-          timezones: state.timezones,
-          data: createData(state.timezones, state.baseTimesUtc)
+          timezones: state.timezones
         };
       }
       return state;
@@ -41,24 +38,20 @@ function reducer(state, action) {
         popoverOpen: action.timezone
       };
     case 'addTime':
+      console.log(action.utcDateTime);
       return {
         ...state,
         baseTimesUtc: [...state.baseTimesUtc, action.utcDateTime]
       };
+    case 'setTimeFormat':
+      return { ...state, timeFormat: action.timeFormat };
+    case 'deleteBaseTime':
+      state.baseTimesUtc.splice(action.index, 1);
+      return {
+        ...state
+      };
     default:
       throw new Error();
   }
-}
-function createData(timezones, baseTimesUtc) {
-  return timezones.map((item) => {
-    return { name: item, times: getTimes(item, baseTimesUtc) };
-  });
-}
-function getTimes(timezone, baseTimesUtc) {
-  const times = [moment.tz(timezone)];
-  for (const baseTime of baseTimesUtc) {
-    times.push(baseTime.tz(timezone));
-  }
-  return times;
 }
 export default reducer;

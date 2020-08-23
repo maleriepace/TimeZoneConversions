@@ -8,8 +8,11 @@ storedBaseTimesUtc =
   storedBaseTimesUtc &&
   JSON.parse(storedBaseTimesUtc).map((time) => moment(time));
 
+const storedTimeFormat = localStorage.getItem('timeFormat');
+
 export default {
   timezones: storedTimezones || ['UTC'],
   baseTimesUtc: storedBaseTimesUtc || [],
-  data: []
+  data: [],
+  timeFormat: storedTimeFormat || '24hr'
 };

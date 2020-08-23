@@ -1,35 +1,55 @@
 import React, { useEffect, useReducer } from 'react';
 import './App.css';
-import Avatar from '@material-ui/core/Avatar';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import TextField from '@material-ui/core/TextField';
-import { DeleteOutline, Schedule } from '@material-ui/icons';
-import Typography from '@material-ui/core/Typography';
+import {
+  Avatar,
+  CssBaseline,
+  Paper,
+  Typography,
+  Container,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow
+} from '@material-ui/core';
+import { Schedule } from '@material-ui/icons';
 
-import Container from '@material-ui/core/Container';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import Paper from '@material-ui/core/Paper';
-import FormControl from '@material-ui/core/FormControl';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import IconButton from '@material-ui/core/IconButton';
+import moment from 'moment';
 
-import timezoneList from './timezone-list';
-import AddDateTimeCell from './AddDateTimeCell';
+// Libraries
 import { useStyles } from './styles';
+
+// State
 import reducer from './state/reducer';
 import initialState from './state/initalState';
 
+// Custom Components
+import AddDateTimeCell from './components/AddDateTimeCell';
+import TimeFormatToggle from './components/TimeFormatToggle';
+import TimezoneDisplayCell from './components/TimezoneDisplayCell';
+import DateTimeDisplayCell from './components/DateTimeDisplayCell';
+import AddTimezone from './components/AddTimezone';
+import CustomTimeHeader from './components/CustomTimeHeader';
+
 function App() {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const [autocompleteValue] = React.useState(null);
-  const [autocompleteInputValue, setAutocompleteInputValue] = React.useState(
-    ''
-  );
+  const [data, setData] = React.useState([]);
+  //createData(state.timezones, state.baseTimesUtc)();
+
+  function createData(timezones, baseTimesUtc) {
+    // return timezones.map((item) => {
+    //   return { name: item, times: getTimes(item, baseTimesUtc) };
+    // });
+  }
+
+  function getTimes(timezone, baseTimesUtc) {
+    const times = [moment.tz(timezone)];
+    for (const baseTime of baseTimesUtc) {
+      times.push(baseTime.tz(timezone));
+    }
+    return times;
+  }
 
   useEffect(() => {
     localStorage.setItem('timezones', JSON.stringify(state.timezones));
@@ -46,38 +66,6 @@ function App() {
     return () => clearInterval(interval);
   }, []);
 
-  const addNewTimezone = () => {
-    return (
-      <TableRow key="newTimezone">
-        <TableCell>
-          <FormControl variant="outlined" className={classes.formControl}>
-            <Autocomplete
-              id="combo-box-demo"
-              value={autocompleteValue}
-              onChange={(event, newValue) => {
-                dispatch({ type: 'addTimezone', value: newValue });
-                setAutocompleteInputValue('');
-              }}
-              inputValue={autocompleteInputValue}
-              onInputChange={(event, newInputValue) => {
-                setAutocompleteInputValue(newInputValue);
-              }}
-              options={timezoneList}
-              style={{ width: 300 }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Add timezone"
-                  variant="outlined"
-                />
-              )}
-            />
-          </FormControl>
-        </TableCell>
-      </TableRow>
-    );
-  };
-
   const classes = useStyles();
   return (
     <Container component="main" maxWidth="md">
@@ -89,49 +77,55 @@ function App() {
         <Typography component="h1" variant="h5">
           Timezone Conversion Table
         </Typography>
+        <TimeFormatToggle state={state} dispatch={dispatch} />
         <TableContainer component={Paper}>
           <Table className={classes.table} aria-label="simple table">
             <TableHead>
               <TableRow>
                 <TableCell>Timezone</TableCell>
                 <TableCell align="left">Now</TableCell>
-                <TableCell align="left"></TableCell>
+                {state.baseTimesUtc.map((baseTimeUtc, baseTimeUtcIndex) => (
+                  <CustomTimeHeader
+                    key={`timeHeader-${baseTimeUtcIndex}`}
+                    state={state}
+                    baseTimeUtc={baseTimeUtc}
+                    baseTimeUtcIndex={baseTimeUtcIndex}
+                    dispatch={dispatch}
+                  />
+                ))}
               </TableRow>
             </TableHead>
             <TableBody>
-              {state.data.map((row, timezoneIndex) => (
-                <TableRow key={row.name}>
-                  <TableCell component="td" scope="row">
-                    {row.name}
-                    {timezoneIndex > 0 && (
-                      <IconButton
-                        aria-label="delete"
-                        onClick={() =>
-                          dispatch({ type: 'deleteTimezone', value: row.name })
-                        }
-                      >
-                        <DeleteOutline />
-                      </IconButton>
-                    )}
-                  </TableCell>
-                  {row.times.map((time, timeIndex) => (
-                    <TableCell key={`${row.name}-${timeIndex}`} align="left">
-                      {time.format('YYYY-MM-DD')}
-                      <br />
-                      {time.format('HH:mm:ss')}
-                      <br />
-                      {time.format('hh:mm:ss A')}
-                    </TableCell>
+              {state.timezones.map((timezone, timezoneIndex) => (
+                <TableRow key={timezone}>
+                  <TimezoneDisplayCell
+                    timezone={timezone}
+                    timezoneIndex={timezoneIndex}
+                    dispatch={dispatch}
+                  />
+                  <DateTimeDisplayCell
+                    state={state}
+                    timezone="UTC"
+                    baseTimeUtc={moment()}
+                  />
+                  {state.baseTimesUtc.map((baseTimeUtc, baseTimeUtcIndex) => (
+                    <DateTimeDisplayCell
+                      key={`${timezone}-${baseTimeUtcIndex}`}
+                      state={state}
+                      timezone={timezone}
+                      baseTimeUtc={baseTimeUtc}
+                    />
                   ))}
                   <AddDateTimeCell
-                    row={row}
+                    timezone={timezone}
                     timezoneIndex={timezoneIndex}
-                    open={row.name === state.popoverOpen}
+                    open={timezone === state.popoverOpen}
                     dispatch={dispatch}
+                    classes={classes}
                   />
                 </TableRow>
               ))}
-              {addNewTimezone()}
+              <AddTimezone classes={classes} dispatch={dispatch} />
             </TableBody>
           </Table>
         </TableContainer>

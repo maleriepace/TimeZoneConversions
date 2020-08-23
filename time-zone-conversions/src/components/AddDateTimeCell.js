@@ -1,5 +1,4 @@
 import React from 'react';
-import './App.css';
 import TextField from '@material-ui/core/TextField';
 import { AddAlarm, Done } from '@material-ui/icons';
 import Popover from '@material-ui/core/Popover';
@@ -7,13 +6,13 @@ import TableCell from '@material-ui/core/TableCell';
 import IconButton from '@material-ui/core/IconButton';
 import moment from 'moment-timezone';
 
-import { useStyles } from './styles';
-
-function AddDateTimeCell({ row, timezoneIndex, open, dispatch }) {
+function AddDateTimeCell({ timezone, timezoneIndex, open, dispatch, classes }) {
   const [anchorEl, setAnchorEl] = React.useState(null);
-  const [textValue, setTextValue] = React.useState(null);
+  const [textValue, setTextValue] = React.useState(
+    moment().tz(timezone).format('YYYY-MM-DDTHH:mm')
+  );
 
-  const handleClick = (event, timezone) => {
+  const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
 
     dispatch({ type: 'openPopover', timezone });
@@ -28,24 +27,17 @@ function AddDateTimeCell({ row, timezoneIndex, open, dispatch }) {
   };
 
   const addDateTime = () => {
-    console.log(textValue);
-
     dispatch({
       type: 'addTime',
-      utcDateTime: moment.tz(textValue, row.name).tz('UTC')
+      utcDateTime: moment.tz(textValue, timezone).utc()
     });
   };
-
-  const classes = useStyles();
-  if (!row) {
-    return {};
-  }
 
   return (
     <TableCell>
       <IconButton
         aria-describedby={open ? `popover-${timezoneIndex}` : ''}
-        onClick={(event) => handleClick(event, row.name)}
+        onClick={handleClick}
       >
         <AddAlarm />
       </IconButton>
@@ -68,11 +60,7 @@ function AddDateTimeCell({ row, timezoneIndex, open, dispatch }) {
             id="datetime-local"
             label="Date/Time"
             type="datetime-local"
-            defaultValue={
-              row.times &&
-              row.times[0] &&
-              row.times[0].format('YYYY-MM-DDTHH:mm')
-            }
+            defaultValue={textValue}
             className={classes.textField}
             InputLabelProps={{
               shrink: true
