@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { TableCell } from '@material-ui/core';
+import { NightsStay, WbSunny } from '@material-ui/icons';
 
 function DateTimeDisplayCell({ state, timezone, baseTimeUtc }) {
   const time = baseTimeUtc.tz(timezone);
@@ -16,6 +17,7 @@ function DateTimeDisplayCell({ state, timezone, baseTimeUtc }) {
       {time.format('YYYY-MM-DD')}
       <br />
       {displayTime()}
+      {time.hours() >= 12 ? <NightsStay /> : <WbSunny />}
     </TableCell>
   );
 }

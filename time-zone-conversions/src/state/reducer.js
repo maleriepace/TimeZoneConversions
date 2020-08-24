@@ -1,11 +1,5 @@
-import moment from 'moment-timezone';
-
 function reducer(state, action) {
   switch (action.type) {
-    case 'setData':
-      return {
-        ...state
-      };
     case 'addTimezone':
       if (
         action.value &&
@@ -48,7 +42,8 @@ function reducer(state, action) {
     case 'deleteBaseTime':
       state.baseTimesUtc.splice(action.index, 1);
       return {
-        ...state
+        ...state,
+        baseTimesUtc: [...state.baseTimesUtc]
       };
     default:
       throw new Error();

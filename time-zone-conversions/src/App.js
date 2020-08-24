@@ -34,22 +34,7 @@ import CustomTimeHeader from './components/CustomTimeHeader';
 
 function App() {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const [data, setData] = React.useState([]);
-  //createData(state.timezones, state.baseTimesUtc)();
-
-  function createData(timezones, baseTimesUtc) {
-    // return timezones.map((item) => {
-    //   return { name: item, times: getTimes(item, baseTimesUtc) };
-    // });
-  }
-
-  function getTimes(timezone, baseTimesUtc) {
-    const times = [moment.tz(timezone)];
-    for (const baseTime of baseTimesUtc) {
-      times.push(baseTime.tz(timezone));
-    }
-    return times;
-  }
+  const [updatedDate, setUpdatedDate] = React.useState([]);
 
   useEffect(() => {
     localStorage.setItem('timezones', JSON.stringify(state.timezones));
@@ -61,7 +46,7 @@ function App() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      dispatch({ type: 'setData' });
+      setUpdatedDate(new Date());
     }, 1000);
     return () => clearInterval(interval);
   }, []);
@@ -93,6 +78,7 @@ function App() {
                     dispatch={dispatch}
                   />
                 ))}
+                <TableCell></TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -105,7 +91,7 @@ function App() {
                   />
                   <DateTimeDisplayCell
                     state={state}
-                    timezone="UTC"
+                    timezone={timezone}
                     baseTimeUtc={moment()}
                   />
                   {state.baseTimesUtc.map((baseTimeUtc, baseTimeUtcIndex) => (
